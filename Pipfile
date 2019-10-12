@@ -8,5 +8,9 @@ verify_ssl = true
 [packages]
 discord-py = "*"
 
+[scripts]
+main = "python3.8 bot.py"
+clean = "rm -r *__pycache__"
+
 [requires]
 python_version = "3.8"

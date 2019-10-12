@@ -37,3 +37,9 @@ Clean artifacts:
 pipenv run clean
 ```
 
+If you prefer docker:
+```
+docker build -t cloudfeedbot -f docker/Dockerfile .
+docker run cloudfeedbot
+```
+

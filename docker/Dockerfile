@@ -1,7 +1,6 @@
 FROM ubuntu:19.04
 
 ENV LC_ALL=C.UTF-8 LANG=C.UTF-8
-ENV SENTRY_RELEASE=${SENTRY_RELEASE_PARAM}
 
 # Install deps, clean apt cache
 RUN apt-get -qq update && apt-get install -qq -y \
@@ -9,13 +8,12 @@ RUN apt-get -qq update && apt-get install -qq -y \
     python3.8-dev \
     python3.8-distutils \
     wget \
-  && apt-get autoremove \
+  && apt-get -qq autoremove \
   && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
 RUN useradd -ms /bin/bash ubuntu \
-  && mkdir -p /app \
   && chown -R ubuntu .
 
 USER ubuntu
@@ -27,7 +25,7 @@ RUN wget -q -O get-pip.py "https://bootstrap.pypa.io/get-pip.py"
 ENV PATH="${PATH}:/home/ubuntu/.local/bin"
 
 # Copy Pipfiles from current dir to container folder
-ADD --chown=ubuntu ./Pipfile* ./
+COPY --chown=ubuntu ./Pipfile* ./
 
 # Setup pipvenv and deps
 RUN python3.8 get-pip.py -q --user \
@@ -37,6 +35,6 @@ RUN python3.8 get-pip.py -q --user \
   && rm get-pip.py
 
 # Copy files from current dir to container folder
-ADD --chown=ubuntu . /app
+COPY --chown=ubuntu . /app
 
 CMD ["bash", "-c", "pipenv run main"]

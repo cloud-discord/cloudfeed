@@ -42,3 +42,9 @@ If you prefer docker:
 docker build -t cloudfeedbot -f docker/Dockerfile .
 docker run cloudfeedbot
 ```
+
+It is recommended to add pre commit hooks to contribute:
+```
+pipenv install --dev
+pipenv run pre-commit install
+```

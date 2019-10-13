@@ -1,0 +1,9 @@
+repos:
+  - repo: local
+    hooks:
+      - id: mypy
+        name: Checking static type errors
+        entry: pipenv run code
+        pass_filenames: false
+        language: system
+        types: [python]

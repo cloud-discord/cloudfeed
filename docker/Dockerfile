@@ -31,7 +31,7 @@ COPY --chown=ubuntu ./Pipfile* ./
 RUN python3.8 get-pip.py -q --user \
   && pip3.8 install -q --user pipenv \
   && pipenv --bare --python 3.8 \
-  && pipenv sync --dev \
+  && pipenv sync \
   && rm get-pip.py
 
 # Copy files from current dir to container folder

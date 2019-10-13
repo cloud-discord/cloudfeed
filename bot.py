@@ -1,14 +1,20 @@
 #!/usr/bin/python3
 import os
+from logging import config, getLogger
 
 import discord
 
-token = os.getenv('DISCORD_TOKEN')
+config.fileConfig('confs/logging.conf')
+logger = getLogger(__name__)
 
+token = os.getenv('DISCORD_TOKEN')
 client = discord.Client()
 
 @client.event
 async def on_ready() -> None:
-    print(f'{client.user} has connected to Discord!')
+  logger.info(f'{client.user} has connected to Discord!')
 
-client.run(token)
+
+if __name__== "__main__":
+  logger.info(f'Starting up...')
+  client.run(token)

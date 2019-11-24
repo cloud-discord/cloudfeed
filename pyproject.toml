@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "Cloudfeed Article Bot"
-version = "0.0.0"
-description = "Discord bot that stores and displays articles in a channel."
+name = "cloudfeed"
+version = "0.1.0"
+description = "Discord bot to store articles"
 authors = ["João Santos <joaopns05@gmail.com>"]
 
 [tool.poetry.dependencies]

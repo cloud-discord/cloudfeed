@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "Cloudfeed Article Bot"
+version = "0.0.0"
+description = "Discord bot that stores and displays articles in a channel."
+authors = ["João Santos <joaopns05@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+discord-py = "^1.2"
+
+[tool.poetry.dev-dependencies]
+pytest = "^3.0"
+mypy = "^0.740.0"
+pre-commit = "^1.20"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"

@@ -39,59 +39,49 @@ async def on_ready() -> None:
   list_info()
   logger.info(f'Ready')
 
+async def question_user(attribute):
+  question = ''
+
+  if attribute == 'title':
+    question = 'What is the title of the article?'
+  elif attribute == 'url':
+    question = 'What is the url of the article?'
+  elif attribute == 'comments':
+    question = 'Do you have any comments on the article?'
+
+  await channel.send(question)
+
+async def get_user_response():
+  def reply_check(reply):
+    if reply.author == ctx.message.author:
+      return str(reply.content)
+
+  try:
+    return await client.wait_for('message', timeout=REPLY_TIMEOUT, check=reply_check)
+  except TimeoutError:
+    await channel.send('You took too long to respond! Are you sleeping? 💤')
+    raise Exception('No response was provided by user.')
 
 @client.command(name='new', help='Adds a new article to the queue.')
 async def new_article(ctx):
   channel = ctx.channel
 
   if channel.name == CHANNEL_NAME:
-    await channel.send('What is the title of the article?')
+    await question_user('title')
+    title = await get_user_response()
 
-    def title_check(reply):
-      if reply.author == ctx.message.author:
-        return str(reply.content)
+    await question_user('url')
+    url = await get_user_response()
 
-    try:
-      title = await client.wait_for('message', timeout=REPLY_TIMEOUT, check=title_check)
-    except TimeoutError:
-      await channel.send('You took too long to respond! Are you sleeping? 💤')
-    else:
-      await channel.send(f'Got -> {title.content}')
+    await question_user('comments')
+    comments = await get_user_response()
 
-  if channel.name == CHANNEL_NAME:
-    await channel.send('What is the url of the article?')
-
-    def url_check(reply):
-      if reply.author == ctx.message.author:
-        return str(reply.content)
-
-    try:
-      url = await client.wait_for('message', timeout=REPLY_TIMEOUT, check=url_check)
-    except TimeoutError:
-      await channel.send('You took too long to respond! Are you sleeping? 💤')
-    else:
-      await channel.send(f'Got -> {url.content}')
-
-
-  if channel.name == CHANNEL_NAME:
-    await channel.send('Do you have any comments on the article?')
-
-    def comments_check(reply):
-      if reply.author == ctx.message.author:
-        return str(reply.content)
-
-    try:
-      comments = await client.wait_for('message', timeout=60.0, check=comments_check)
-    except TimeoutError:
-      await channel.send('You took too long to respond! Are you sleeping? 💤')
-    else:
-      await channel.send(f'Got -> {comments.content}')
-
-  await channel.send(f'Storing article in queue...')
-  await article_queue.put(Article(title=title, link=url, description=comments))
-  await channel.send(f'Done!')
+    await channel.send(f'Storing article in queue...')
+    await article_queue.put(Article(title=title, link=url, description=comments))
+    await channel.send(f'Done!')
 
 
 if __name__ == "__main__":
   logger.info(f'Starting up...')
   client.run(token)
+

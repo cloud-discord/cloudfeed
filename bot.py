@@ -2,7 +2,7 @@ import os
 
 from discord.ext import commands as discord
 from logging import config, getLogger
-from asyncio import Queue, TimeoutError
+import asyncio
 
 from cloudfeed.article import Article
 
@@ -11,12 +11,13 @@ logger = getLogger(__name__)
 
 CHANNEL_NAME = os.getenv('CHANNEL_NAME')
 GUILD_NAME = os.getenv('GUILD_NAME')
-REPLY_TIMEOUT = os.getenv('REPLY_TIMEOUT', 30.0)
+REPLY_TIMEOUT = os.getenv('REPLY_TIMEOUT', 60.0)
+ARTICLE_INTERVAL = os.getenv('ARTICLE_INTERVAL', 86400.0)
 QUEUE_MAXSIZE = os.getenv('QUEUE_MAXSIZE', 20)
 token = os.getenv('DISCORD_TOKEN')
 
 client = discord.Bot(command_prefix='$')
-article_queue: Queue = Queue(maxsize=QUEUE_MAXSIZE)
+article_queue: asyncio.Queue = asyncio.Queue(maxsize=QUEUE_MAXSIZE)
 
 def list_info():
   guilds = client.guilds
@@ -59,10 +60,11 @@ async def get_user_response(command_author, channel):
 
   try:
     return await client.wait_for('message', timeout=REPLY_TIMEOUT, check=reply_check)
-  except TimeoutError:
+  except asyncio.TimeoutError:
     await channel.send('You took too long to respond! Are you sleeping? 💤')
     logger.error('No response was provided by user...')
     raise ValueError('No response was provided by user')
+
 
 @client.command(name='new', help='Adds a new article to the queue.')
 async def new_article(ctx):
@@ -81,8 +83,15 @@ async def new_article(ctx):
       comments = await get_user_response(author, channel)
 
       await channel.send(f'Storing article in queue...')
-      await article_queue.put(Article(title=title, link=url, description=comments))
-      logger.debug(f'Stored article with title {title.content}, link {url.content} and description {comments.content}')
+      await article_queue.put(
+              Article
+              (
+                  title=title.content,
+                  link=url.content,
+                  description=comments.content
+              ))
+      logger.debug(f'Stored article with title {title.content}, ' \
+              f'link {url.content} and description {comments.content}')
 
       logger.info(f'New article stored in queue')
       logger.info(f'Queue size is now {article_queue.qsize()}')
@@ -90,6 +99,31 @@ async def new_article(ctx):
     except ValueError:
         logger.error('Unable to create article')
 
+
+async def message_task(channel):
+  while True:
+    if not article_queue.empty():
+      logger.info(f'Publishing article...')
+      article = await article_queue.get()
+      article_comments = article.description
+      article_url = article.link
+
+      await channel.send(article_comments)
+      await channel.send(article_url)
+      logger.info(f'Queue size is now {article_queue.qsize()}')
+    else:
+      logger.info(f'Queue is empty...')
+
+    # Continue execution after sleep
+    await asyncio.sleep(ARTICLE_INTERVAL)
+
+@client.command(name='publish', help='Publish articles to a channel')
+async def publish_articles(ctx):
+  channel = ctx.channel
+  author = ctx.message.author
+
+  if channel.name == CHANNEL_NAME:
+      asyncio.create_task(message_task(channel))
 
 if __name__ == "__main__":
   logger.info(f'Starting up...')

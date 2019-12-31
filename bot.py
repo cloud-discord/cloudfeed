@@ -12,10 +12,11 @@ logger = getLogger(__name__)
 CHANNEL_NAME = os.getenv('CHANNEL_NAME')
 GUILD_NAME = os.getenv('GUILD_NAME')
 REPLY_TIMEOUT = os.getenv('REPLY_TIMEOUT', 30.0)
+QUEUE_MAXSIZE = os.getenv('QUEUE_MAXSIZE', 20)
 token = os.getenv('DISCORD_TOKEN')
 
 client = discord.Bot(command_prefix='$')
-article_queue: Queue = Queue(maxsize=20)
+article_queue: Queue = Queue(maxsize=QUEUE_MAXSIZE)
 
 def list_info():
   guilds = client.guilds

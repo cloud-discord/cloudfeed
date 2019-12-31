@@ -39,7 +39,7 @@ async def on_ready() -> None:
   list_info()
   logger.info(f'Ready')
 
-async def question_user(attribute):
+async def question_user(attribute, channel):
   question = ''
 
   if attribute == 'title':
@@ -51,34 +51,43 @@ async def question_user(attribute):
 
   await channel.send(question)
 
-async def get_user_response():
+async def get_user_response(command_author, channel):
   def reply_check(reply):
-    if reply.author == ctx.message.author:
+    if reply.author == command_author:
       return str(reply.content)
 
   try:
     return await client.wait_for('message', timeout=REPLY_TIMEOUT, check=reply_check)
   except TimeoutError:
     await channel.send('You took too long to respond! Are you sleeping? 💤')
-    raise Exception('No response was provided by user.')
+    logger.error('No response was provided by user...')
+    raise ValueError('No response was provided by user')
 
 @client.command(name='new', help='Adds a new article to the queue.')
 async def new_article(ctx):
   channel = ctx.channel
+  author = ctx.message.author
 
   if channel.name == CHANNEL_NAME:
-    await question_user('title')
-    title = await get_user_response()
+    try:
+      await question_user('title', channel)
+      title = await get_user_response(author, channel)
 
-    await question_user('url')
-    url = await get_user_response()
+      await question_user('url', channel)
+      url = await get_user_response(author, channel)
 
-    await question_user('comments')
-    comments = await get_user_response()
+      await question_user('comments', channel)
+      comments = await get_user_response(author, channel)
 
-    await channel.send(f'Storing article in queue...')
-    await article_queue.put(Article(title=title, link=url, description=comments))
-    await channel.send(f'Done!')
+      await channel.send(f'Storing article in queue...')
+      await article_queue.put(Article(title=title, link=url, description=comments))
+      logger.debug(f'Stored article with title {title.content}, link {url.content} and description {comments.content}')
+
+      logger.info(f'New article stored in queue')
+      logger.info(f'Queue size is now {article_queue.qsize()}')
+      await channel.send(f'Done! 🌟')
+    except ValueError:
+        logger.error('Unable to create article')
 
 
 if __name__ == "__main__":

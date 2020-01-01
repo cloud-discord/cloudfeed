@@ -6,35 +6,30 @@ Simple discord bot to post messages into a channel written in python
 
 First you need to install python. If you use a debian based distro you can use these commands:
 ```bash
-wget https://raw.githubusercontent.com/joaonsantos/SmallScripts/master/install-python-pip-pipenv.sh
-chmod +x install-python-pip-pipenv.sh
-./install-python-pip-pipenv.sh 3.8
+wget https://raw.githubusercontent.com/joaonsantos/SmallScripts/master/install-python-pip-poetry.sh
+chmod +x install-python-pip-poetry.sh
+./install-python-pip-poetry.sh 3.8
 ```
 
-This installs python3.8, pip and pipenv.
+This installs python3.8, pip and poetry.
 
 ## Install project dependencies
 
 To install project dependencies:
 ```bash
-pipenv install
+poetry install
 ```
 
 ## Running the project
 
 To run the project use:
 ```bash
-pipenv run main
+poetry run python bot.py
 ```
 
-Run code quality checks:
+Run static type checks:
 ```bash
-pipenv run code
-```
-
-Clean artifacts:
-```bash
-pipenv run clean
+poetry run mypy --config-file .mypy.ini bot.py
 ```
 
 If you prefer docker:
@@ -45,6 +40,6 @@ docker run cloudfeedbot
 
 It is recommended to add pre commit hooks to contribute:
 ```
-pipenv install --dev
-pipenv run pre-commit install
+poetry install
+poetry run pre-commit install
 ```

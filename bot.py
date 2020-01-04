@@ -10,6 +10,7 @@ config.fileConfig('confs/logging.conf')
 logger = getLogger(__name__)
 
 CHANNEL_NAME = os.getenv('CHANNEL_NAME')
+OUTPUT_CHANNEL = os.getenv('OUTPUT_CHANNEL')
 GUILD_NAME = os.getenv('GUILD_NAME')
 REPLY_TIMEOUT = os.getenv('REPLY_TIMEOUT', 60.0)
 ARTICLE_INTERVAL = os.getenv('ARTICLE_INTERVAL', 86400.0)
@@ -122,7 +123,7 @@ async def publish_articles(ctx):
   channel = ctx.channel
   author = ctx.message.author
 
-  if channel.name == CHANNEL_NAME:
+  if channel.name == OUTPUT_CHANNEL:
       asyncio.create_task(message_task(channel))
 
 if __name__ == "__main__":

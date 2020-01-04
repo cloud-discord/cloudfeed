@@ -1,3 +1,6 @@
 docker
 .git
 .gitignore
+cloudfeed.egg-info
+*.md
+LICENSE

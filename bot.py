@@ -1,6 +1,6 @@
 import os
 
-from discord.ext import commands as discord
+from discord.ext import commands as discord # type: ignore
 from logging import config, getLogger
 import asyncio
 
@@ -12,13 +12,13 @@ logger = getLogger(__name__)
 CHANNEL_NAME = os.getenv('CHANNEL_NAME')
 OUTPUT_CHANNEL = os.getenv('OUTPUT_CHANNEL')
 GUILD_NAME = os.getenv('GUILD_NAME')
-REPLY_TIMEOUT = os.getenv('REPLY_TIMEOUT', 60.0)
-ARTICLE_INTERVAL = os.getenv('ARTICLE_INTERVAL', 86400.0)
+REPLY_TIMEOUT = os.getenv('REPLY_TIMEOUT', 60)
+ARTICLE_INTERVAL = os.getenv('ARTICLE_INTERVAL', 86400)
 QUEUE_MAXSIZE = os.getenv('QUEUE_MAXSIZE', 20)
-token = os.getenv('DISCORD_TOKEN')
+DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
 
 client = discord.Bot(command_prefix='$')
-article_queue: asyncio.Queue = asyncio.Queue(maxsize=QUEUE_MAXSIZE)
+article_queue: asyncio.Queue = asyncio.Queue(maxsize=int(QUEUE_MAXSIZE))
 
 def list_info():
   guilds = client.guilds
@@ -60,7 +60,7 @@ async def get_user_response(command_author, channel):
       return str(reply.content)
 
   try:
-    return await client.wait_for('message', timeout=REPLY_TIMEOUT, check=reply_check)
+    return await client.wait_for('message', timeout=int(REPLY_TIMEOUT), check=reply_check)
   except asyncio.TimeoutError:
     await channel.send('You took too long to respond! Are you sleeping? 💤')
     logger.error('No response was provided by user...')
@@ -101,22 +101,22 @@ async def new_article(ctx):
         logger.error('Unable to create article')
 
 
-async def message_task(channel):
-  while True:
-    if not article_queue.empty():
-      logger.info(f'Publishing article...')
-      article = await article_queue.get()
-      article_comments = article.description
-      article_url = article.link
+async def _message_task(channel):
+    while True:
+      if not article_queue.empty():
+        logger.info(f'Publishing article...')
+        article = await article_queue.get()
+        article_comments = article.description
+        article_url = article.link
 
-      await channel.send(article_comments)
-      await channel.send(article_url)
-      logger.info(f'Queue size is now {article_queue.qsize()}')
-    else:
-      logger.info(f'Queue is empty...')
-
-    # Continue execution after sleep
-    await asyncio.sleep(ARTICLE_INTERVAL)
+        await channel.send(article_comments)
+        await channel.send(article_url)
+        logger.info(f'Queue size is now {article_queue.qsize()}')
+        logger.debug(f"Article interval is {ARTICLE_INTERVAL}")
+        await asyncio.sleep(int(ARTICLE_INTERVAL))
+      else:
+        logger.info(f'No more messages to publish...')
+        logger.info(f'Retrying in {ARTICLE_INTERVAL}...')
 
 @client.command(name='publish', help='Publish articles to a channel')
 async def publish_articles(ctx):
@@ -124,9 +124,10 @@ async def publish_articles(ctx):
   author = ctx.message.author
 
   if channel.name == OUTPUT_CHANNEL:
-      asyncio.create_task(message_task(channel))
+      task = asyncio.create_task(_message_task(channel))
+      await task
 
 if __name__ == "__main__":
   logger.info(f'Starting up...')
-  client.run(token)
+  client.run(DISCORD_TOKEN)
 

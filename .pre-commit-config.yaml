@@ -3,7 +3,7 @@ repos:
     hooks:
       - id: mypy
         name: Checking static type errors
-        entry: pipenv run code
+        entry: poetry run mypy bot.py cloudfeed
         pass_filenames: false
         language: system
         types: [python]

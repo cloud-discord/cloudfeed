@@ -1,17 +1,13 @@
 # CloudFeed Bot
 
-Simple discord bot to post messages into a channel written in python
+Discord bot to post articles into a Discord channel.
 
-## Setup dev environment
+## Requirements
 
-First you need to install python. If you use a debian based distro you can use these commands:
-```bash
-wget https://raw.githubusercontent.com/joaonsantos/SmallScripts/master/install-python-pip-poetry.sh
-chmod +x install-python-pip-poetry.sh
-./install-python-pip-poetry.sh 3.8
-```
+This project uses poetry to manage dependencies and create virtual environments.<br/>
+To install poetry, visit https://python-poetry.org/docs/#installation.
 
-This installs python3.8, pip and poetry.
+Enable bash completion with https://python-poetry.org/docs/#enable-tab-completion-for-bash-fish-or-zsh.
 
 ## Install project dependencies
 

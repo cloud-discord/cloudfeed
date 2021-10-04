@@ -1,8 +1,10 @@
 import os
 
-from discord.ext import commands as discord # type: ignore
+import discord
+from discord.ext import commands
 from logging import config, getLogger
 import asyncio
+import youtube_dl
 
 from cloudfeed.article import Article
 
@@ -17,7 +19,7 @@ ARTICLE_INTERVAL = os.getenv('ARTICLE_INTERVAL', 86400)
 QUEUE_MAXSIZE = os.getenv('QUEUE_MAXSIZE', 20)
 DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
 
-client = discord.Bot(command_prefix='$')
+client = commands.Bot(command_prefix='$')
 article_queue: asyncio.Queue = asyncio.Queue(maxsize=int(QUEUE_MAXSIZE))
 
 def list_info():
@@ -68,7 +70,7 @@ async def get_user_response(command_author, channel):
 
 
 @client.command(name='new', help='Adds a new article to the queue.')
-async def new_article(ctx):
+async def new_article(ctx: commands.Context):
   channel = ctx.channel
   author = ctx.message.author
 
@@ -114,18 +116,49 @@ async def _message_task(channel):
         logger.info(f'Queue size is now {article_queue.qsize()}')
         logger.debug(f"Article interval is {ARTICLE_INTERVAL}")
         await asyncio.sleep(int(ARTICLE_INTERVAL))
-      else:
-        logger.info(f'No more messages to publish...')
-        logger.info(f'Retrying in {ARTICLE_INTERVAL}...')
 
 @client.command(name='publish', help='Publish articles to a channel')
-async def publish_articles(ctx):
+async def publish_articles(ctx: commands.Context):
   channel = ctx.channel
-  author = ctx.message.author
 
   if channel.name == OUTPUT_CHANNEL:
       task = asyncio.create_task(_message_task(channel))
       await task
+
+@client.command(name="play", help="Play a youtube music video")
+async def play_music(ctx: commands.Context, url: str):
+  song_there = os.path.isfile("song.mp3")
+  try:
+      if song_there:
+          os.remove("song.mp3")
+  except PermissionError:
+      await ctx.send("Wait for the current playing music to end or use the 'stop' command")
+      return
+
+  voice_channel = discord.utils.get(ctx.guild.voice_channels, name="💬 Chilling")
+  await voice_channel.connect()
+  voice = discord.utils.get(client.voice_clients, guild=ctx.guild)
+
+  ydl_opts = {
+        'format': 'bestaudio/best',
+        'postprocessors': [{
+            'key': 'FFmpegExtractAudio',
+            'preferredcodec': 'mp3',
+            'preferredquality': '192',
+        }],
+    }
+  with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+      ydl.download([url])
+  for file in os.listdir("./"):
+      if file.endswith(".mp3"):
+          os.rename(file, "song.mp3")
+  voice.play(discord.FFmpegPCMAudio("song.mp3"))
+
+@client.command(name="stop", help="Stop youtube music video")
+async def stop(ctx: commands.Context):
+    voice: discord.VoiceClient = discord.utils.get(client.voice_clients, guild=ctx.guild)
+    await voice.disconnect()
+
 
 if __name__ == "__main__":
   logger.info(f'Starting up...')

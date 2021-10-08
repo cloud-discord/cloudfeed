@@ -1,11 +1,11 @@
 [tool.poetry]
 name = "cloudfeed"
-version = "1.1.0"
+version = "1.5.0"
 description = "Discord bot for A Spot in the Cloud Discord"
 authors = ["João Santos <joaopns05@gmail.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.10"
 "discord.py" = "^1.7.3"
 youtube_dl = "^2021.6.6"
 PyNaCl = "^1.4.0"
@@ -14,14 +14,13 @@ PyNaCl = "^1.4.0"
 pytest = "^6.2.5"
 mypy = "^0.910"
 pre-commit = "^2.15.0"
-
-[tool.poetry.dev-dependencies]
+autopep8 = "^1.5.7"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [mypy]
-python_version = "3.9"
+python_version = "3.10"
 warn_return_any = true
 warn_unused_configs = true

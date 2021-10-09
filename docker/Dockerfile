@@ -1,4 +1,4 @@
-FROM python:3.8 AS build
+FROM python:3.10 AS build
 
 WORKDIR /opt/app
 
@@ -10,12 +10,12 @@ RUN pip install -q poetry
 
 ENV PATH="/opt/app/.venv/bin:$PATH" VIRTUAL_ENV="/opt/app/.venv"
 
-RUN python3.8 -m venv .venv \
+RUN python3.10 -m venv .venv \
   && poetry config virtualenvs.in-project true \
   && poetry install --no-root --no-dev
 
 
-FROM python:3.8
+FROM python:3.10
 
 ENV LC_ALL=C.UTF-8 LANG=C.UTF-8
 WORKDIR /opt/app

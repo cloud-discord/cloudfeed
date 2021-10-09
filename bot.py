@@ -1,16 +1,15 @@
-import os
 import logging
 
 import discord
 from discord.ext import commands
-import youtube_dl
 
+from cloudfeed import music
 from cloudfeed import config
 from cloudfeed import botutils
 
 logger = logging.getLogger(__name__)
 
-client = commands.Bot(command_prefix='$')
+client = commands.Bot(command_prefix=commands.when_mentioned_or('$'))
 
 
 @client.event
@@ -21,46 +20,31 @@ async def on_ready() -> None:
 
 @client.command(name="play", help="Play a youtube music video")
 async def play_music(ctx: commands.Context, url: str):
-    song_there = os.path.isfile("song.mp3")
-    try:
-        if song_there:
-            os.remove("song.mp3")
-    except PermissionError:
-        await ctx.send("Wait for the current playing music to end or use the 'stop' command")
-        return
+    await _ensure_voice(ctx)
 
-    voice_channel: discord.VoiceChannel = discord.utils.get(
-        ctx.guild.voice_channels, name="💬 Chilling")
+    async with ctx.typing():
+        player = await music.YTDLSource.from_url(url)
+        ctx.voice_client.play(player, after=lambda e: print('Player error: %s' % e) if e else None)
 
-    try:
-        await voice_channel.connect()
-    except discord.errors.ClientException as e:
-        logger.error(f"already connected to a voice channel: {e}")
-
-    voice = discord.utils.get(client.voice_clients, guild=ctx.guild)
-
-    ydl_opts = {
-        'format': 'bestaudio/best',
-        'postprocessors': [{
-            'key': 'FFmpegExtractAudio',
-            'preferredcodec': 'mp3',
-            'preferredquality': '192',
-        }],
-    }
-    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-        ydl.download([url])
-    for file in os.listdir("./"):
-        if file.endswith(".mp3"):
-            os.rename(file, "song.mp3")
-    voice.play(discord.FFmpegPCMAudio("song.mp3"))
+    await ctx.send('Now playing: {}'.format(player.title))
 
 
 @client.command(name="stop", help="Stop youtube music video")
 async def stop(ctx: commands.Context):
-    voice: discord.VoiceClient = discord.utils.get(
-        client.voice_clients, guild=ctx.guild)
-    await voice.disconnect()
+    await ctx.voice_client.disconnect()
 
+async def _ensure_voice(ctx):
+    if ctx.voice_client is None:
+        if ctx.author.voice:
+            try:
+                await ctx.author.voice.channel.connect()
+            except discord.errors.ClientException as e:
+                logger.error(f"already connected to a voice channel: {e}")
+        else:
+            await ctx.send("You are not connected to a voice channel.")
+            raise commands.CommandError("Author not connected to a voice channel.")
+    elif ctx.voice_client.is_playing():
+        ctx.voice_client.stop()
 
 if __name__ == "__main__":
     logger.info(f'Starting up...')

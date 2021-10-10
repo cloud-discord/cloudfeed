@@ -8,15 +8,17 @@ To set up the development environment python and poetry must be installed.
 
 ### Python
 
-This project requires Python 3.10. Please visit https://www.python.org/downloads/release/python-3100 to install it.
+This project requires Python 3.10.
+
+Please visit https://www.python.org/downloads/release/python-3100 to install it.
 
 ### Poetry
 
 This project requires poetry 1.2.0a2. To install please visit https://python-poetry.org/docs/master/#installation.
-<br/>
-Make sure to set `$POETRY_VERSION=1.2.0a2`. Check with `poetry --version` after installing.
 
-Make sure to add poetry binary executable path to `$PATH`, by default `$HOME/.local/bin`.
+Please note:
+- Make sure to set `$POETRY_VERSION=1.2.0a2`. Check with `poetry --version` after installing.
+- Make sure to add poetry binary executable path to `$PATH`, by default `$HOME/.local/bin`.
 
 ### Virtual Environment
 

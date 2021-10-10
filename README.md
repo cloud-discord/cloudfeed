@@ -47,13 +47,16 @@ For more information, please visit https://discord.com/developers/docs/intro.
 
 Inside the virtualenv run:
 ```bash
-python bot.py
+$ python bot.py
 ```
 
 Running in docker:
 ```bash
-docker build -t cloudfeedbot -f docker/Dockerfile .
-docker run -e DISCORD_TOKEN=$DISCORD_TOKEN cloudfeedbot
+$ docker build -t cloudfeedbot -f docker/Dockerfile .
+```
+
+```bash
+$ docker run -e DISCORD_TOKEN=$DISCORD_TOKEN cloudfeedbot
 ```
 
 ### Interacting with the Bot

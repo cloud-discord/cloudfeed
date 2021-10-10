@@ -22,15 +22,15 @@ Make sure to add poetry binary executable path to `$PATH`, by default `$HOME/.lo
 
 To create the project virtual environment where your dependencies will live, run the following:
 ```bash
-poetry env use 3.10 # ensure poetry uses python 3.10
+$ poetry env use 3.10 # ensure poetry uses python 3.10
 ```
 
 ```bash
-poetry shell # sets the current shell environment to use the virtualenv settings
+$ poetry shell # sets the current shell environment to use the virtualenv settings
 ```
 
 ```bash
-poetry install # install all dependencies, including dev dependencies
+$ poetry install # install all dependencies, including dev dependencies
 ```
 
 ### FFmpeg

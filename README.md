@@ -1,45 +1,66 @@
 # CloudFeed Bot
 
-Simple discord bot to post messages into a channel written in python
+Discord bot that provides music and news feed features.
 
 ## Setup dev environment
 
-First you need to install python. If you use a debian based distro you can use these commands:
+To set up the development environment python and poetry must be installed.
+
+### Python
+
+This project requires Python 3.10.
+
+Please visit https://www.python.org/downloads/release/python-3100 to install it.
+
+### Poetry
+
+This project requires poetry 1.2.0a2. To install please visit https://python-poetry.org/docs/master/#installation.
+
+Please note:
+- Make sure to set `$POETRY_VERSION=1.2.0a2`. Check with `poetry --version` after installing.
+- Make sure to add poetry binary executable path to `$PATH`, by default `$HOME/.local/bin`.
+
+### Virtual Environment
+
+To create the project virtual environment where your dependencies will live, run the following:
 ```bash
-wget https://raw.githubusercontent.com/joaonsantos/SmallScripts/master/install-python-pip-poetry.sh
-chmod +x install-python-pip-poetry.sh
-./install-python-pip-poetry.sh 3.8
+$ poetry env use 3.10 # ensure poetry uses python 3.10
 ```
 
-This installs python3.8, pip and poetry.
-
-## Install project dependencies
-
-To install project dependencies:
 ```bash
-poetry install
+$ poetry shell # sets the current shell environment to use the virtualenv settings
 ```
+
+```bash
+$ poetry install # install all dependencies, including dev dependencies
+```
+
+### FFmpeg
+
+Since this bot has media capabilities, it requires a media library to be available in the system.
+
+One such library is FFmpeg, to learn more and install please visit https://www.ffmpeg.org.
 
 ## Running the project
 
-To run the project use:
+This project requires a discord app token to connect do discord. Please set `$DISCORD_TOKEN`.
+<br/>
+For more information, please visit https://discord.com/developers/docs/intro.
+
+Inside the virtualenv run:
 ```bash
-poetry run python bot.py
+$ python bot.py
 ```
 
-Run static type checks:
+Running in docker:
 ```bash
-poetry run mypy --config-file .mypy.ini bot.py
+$ docker build -t cloudfeedbot -f docker/Dockerfile .
 ```
 
-If you prefer docker:
 ```bash
-docker build -t cloudfeedbot -f docker/Dockerfile .
-docker run cloudfeedbot
+$ docker run -e DISCORD_TOKEN=$DISCORD_TOKEN cloudfeedbot
 ```
 
-It is recommended to add pre commit hooks to contribute:
-```
-poetry install
-poetry run pre-commit install
-```
+### Interacting with the Bot
+
+When the bot is up and running to interact with it simply mention it using `@` or use the command prefix `$`.
